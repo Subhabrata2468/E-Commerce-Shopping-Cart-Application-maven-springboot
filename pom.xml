@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- Inheriting defaults from Spring Boot parent POM (dependency versions, plugin configs, etc.) -->
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.2.4</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+
+	<groupId>com.ecom</groupId>
+	<artifactId>Shopping_Cart</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>Shopping_Cart</name>
+	<description>Online Shopping Cart Spring boot mvc Project</description>
+
+	<properties>
+		<java.version>17</java.version> <!-- Project is using Java 17 -->
+	</properties>
+
+	<dependencies>
+		<!-- Spring Data JPA (Hibernate + JPA support) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<!-- Thymeleaf template engine for server-side rendering -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+
+		<!-- Spring MVC + embedded Tomcat -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- MySQL JDBC driver (runtime dependency) -->
+		<!-- ⚠️ During tests, if MySQL is not running, context loading may fail -->
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Developer tools for hot reloading (disabled in production) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+		</dependency>
+
+		<!-- Lombok (auto-generates boilerplate code like getters/setters) -->
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.38</version>
+            <scope>provided</scope>
+        </dependency>
+
+		<!-- Spring Boot testing support (JUnit, AssertJ, Mockito, etc.) -->
+		<!-- ⚠️ Tests fail to load if required beans (DB, mail, security) are missing -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Spring Security (adds authentication & authorization) -->
+		<!-- ⚠️ Requires a SecurityFilterChain bean, otherwise context load may fail -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- Spring Boot Mail (for email support) -->
+		<!-- ⚠️ Needs mail server configs; without them, context load may fail -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+			<!--<version>3.3.1</version>--> <!-- Version is managed by Spring Boot, no need to specify -->
+		</dependency>
+	</dependencies>
+
+	<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+                <!-- Tell Spring Boot to look for external properties -->
+                <arguments>
+                    <argument>--spring.config.location=file:./application.properties</argument>
+                </arguments>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+
+
+</project>
