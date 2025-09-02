@@ -1,16 +1,11 @@
 package com.ecom.service.impl;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Date;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -20,6 +15,7 @@ import com.ecom.model.UserDtls;
 import com.ecom.repository.UserRepository;
 import com.ecom.service.UserService;
 import com.ecom.util.AppConstant;
+import com.ecom.util.FileUploadUtil;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -29,6 +25,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private FileUploadUtil fileUploadUtil;
 
 	@Override
 	public UserDtls saveUser(UserDtls user) {
@@ -129,7 +128,11 @@ public class UserServiceImpl implements UserService {
 		UserDtls dbUser = userRepository.findById(user.getId()).get();
 
 		if (!img.isEmpty()) {
-			dbUser.setProfileImage(img.getOriginalFilename());
+			// Use the new file upload utility
+			String savedFilename = fileUploadUtil.saveFile(img, "profile_img");
+			if (savedFilename != null) {
+				dbUser.setProfileImage(savedFilename);
+			}
 		}
 
 		if (!ObjectUtils.isEmpty(dbUser)) {
@@ -141,20 +144,6 @@ public class UserServiceImpl implements UserService {
 			dbUser.setState(user.getState());
 			dbUser.setPincode(user.getPincode());
 			dbUser = userRepository.save(dbUser);
-		}
-
-		try {
-			if (!img.isEmpty()) {
-				File saveFile = new ClassPathResource("static/img").getFile();
-
-				Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + "profile_img" + File.separator
-						+ img.getOriginalFilename());
-
-//			System.out.println(path);
-				Files.copy(img.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 
 		return dbUser;

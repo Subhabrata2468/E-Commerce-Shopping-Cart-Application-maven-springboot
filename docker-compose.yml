@@ -33,6 +33,8 @@ services:
       # Mount external application.properties securely
       - ./application.properties:/app/config/application.properties
       - app_logs:/app/logs # Optional: for persisting application logs
+      # Mount uploads directory for file storage
+      - ./uploads:/app/uploads
     environment:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
@@ -47,6 +49,8 @@ services:
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
       SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: 50MB
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: 50MB
+      # Add upload directory configuration
+      UPLOAD_DIR: /app/uploads
 
 volumes:
   mysql_data:

@@ -21,6 +21,10 @@ WORKDIR /app
 # Copy the fat JAR from build stage
 COPY --from=build /app/target/*.jar app.jar
 
+# Create uploads directory and set permissions
+RUN mkdir -p /app/uploads/profile_img /app/uploads/product_img /app/uploads/category_img && \
+    chmod -R 755 /app/uploads
+
 # Expose port
 EXPOSE 8080
 

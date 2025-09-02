@@ -1,16 +1,10 @@
 package com.ecom.controller;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -34,6 +28,7 @@ import com.ecom.service.OrderService;
 import com.ecom.service.ProductService;
 import com.ecom.service.UserService;
 import com.ecom.util.CommonUtil;
+import com.ecom.util.FileUploadUtil;
 import com.ecom.util.OrderStatus;
 
 import jakarta.servlet.http.HttpSession;
@@ -62,6 +57,9 @@ public class AdminController {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private FileUploadUtil fileUploadUtil;
 
 	@ModelAttribute
 	public void getUserDetails(Principal p, Model m) {
@@ -111,12 +109,9 @@ public class AdminController {
 	public String saveCategory(@ModelAttribute Category category, @RequestParam("file") MultipartFile file,
 			HttpSession session) throws IOException {
 
-		String imageName = file != null ? file.getOriginalFilename() : "default.jpg";
-		category.setImageName(imageName);
+		Boolean existsName = categoryService.existsName(category.getName());
 
-		Boolean existCategory = categoryService.existCategory(category.getName());
-
-		if (existCategory) {
+		if (existsName) {
 			session.setAttribute("errorMsg", "Category Name already exists");
 		} else {
 
@@ -126,13 +121,15 @@ public class AdminController {
 				session.setAttribute("errorMsg", "Not saved ! internal server error");
 			} else {
 
-				File saveFile = new ClassPathResource("static/img").getFile();
-
-				Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + "category_img" + File.separator
-						+ file.getOriginalFilename());
-
-				// System.out.println(path);
-				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+				if (!file.isEmpty()) {
+					// Use the new file upload utility
+					String savedFilename = fileUploadUtil.saveFile(file, "category_img");
+					if (savedFilename != null) {
+						// Update the category with the new filename
+						saveCategory.setImageName(savedFilename);
+						categoryService.saveCategory(saveCategory);
+					}
+				}
 
 				session.setAttribute("succMsg", "Saved successfully");
 			}
@@ -165,29 +162,27 @@ public class AdminController {
 			HttpSession session) throws IOException {
 
 		Category oldCategory = categoryService.getCategoryById(category.getId());
-		String imageName = file.isEmpty() ? oldCategory.getImageName() : file.getOriginalFilename();
+		String imageName = oldCategory.getImageName();
 
 		if (!ObjectUtils.isEmpty(category)) {
 
 			oldCategory.setName(category.getName());
 			oldCategory.setIsActive(category.getIsActive());
+			
+			if (!file.isEmpty()) {
+				// Use the new file upload utility
+				String savedFilename = fileUploadUtil.saveFile(file, "category_img");
+				if (savedFilename != null) {
+					imageName = savedFilename;
+				}
+			}
+			
 			oldCategory.setImageName(imageName);
 		}
 
 		Category updateCategory = categoryService.saveCategory(oldCategory);
 
 		if (!ObjectUtils.isEmpty(updateCategory)) {
-
-			if (!file.isEmpty()) {
-				File saveFile = new ClassPathResource("static/img").getFile();
-
-				Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + "category_img" + File.separator
-						+ file.getOriginalFilename());
-
-				// System.out.println(path);
-				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-			}
-
 			session.setAttribute("succMsg", "Category update success");
 		} else {
 			session.setAttribute("errorMsg", "something wrong on server");
@@ -200,7 +195,14 @@ public class AdminController {
 	public String saveProduct(@ModelAttribute Product product, @RequestParam("file") MultipartFile image,
 			HttpSession session) throws IOException {
 
-		String imageName = image.isEmpty() ? "default.jpg" : image.getOriginalFilename();
+		String imageName = "default.jpg";
+		if (!image.isEmpty()) {
+			// Use the new file upload utility
+			String savedFilename = fileUploadUtil.saveFile(image, "product_img");
+			if (savedFilename != null) {
+				imageName = savedFilename;
+			}
+		}
 
 		product.setImage(imageName);
 		product.setDiscount(0);
@@ -208,15 +210,6 @@ public class AdminController {
 		Product saveProduct = productService.saveProduct(product);
 
 		if (!ObjectUtils.isEmpty(saveProduct)) {
-
-			File saveFile = new ClassPathResource("static/img").getFile();
-
-			Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + "product_img" + File.separator
-					+ image.getOriginalFilename());
-
-			// System.out.println(path);
-			Files.copy(image.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-
 			session.setAttribute("succMsg", "Product Saved Success");
 		} else {
 			session.setAttribute("errorMsg", "something wrong on server");
@@ -411,20 +404,19 @@ public class AdminController {
 	public String saveAdmin(@ModelAttribute UserDtls user, @RequestParam("img") MultipartFile file, HttpSession session)
 			throws IOException {
 
-		String imageName = file.isEmpty() ? "default.jpg" : file.getOriginalFilename();
+		String imageName = "default.jpg";
+		if (!file.isEmpty()) {
+			// Use the new file upload utility
+			String savedFilename = fileUploadUtil.saveFile(file, "profile_img");
+			if (savedFilename != null) {
+				imageName = savedFilename;
+			}
+		}
+		
 		user.setProfileImage(imageName);
 		UserDtls saveUser = userService.saveAdmin(user);
 
 		if (!ObjectUtils.isEmpty(saveUser)) {
-			if (!file.isEmpty()) {
-				File saveFile = new ClassPathResource("static/img").getFile();
-
-				Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + "profile_img" + File.separator
-						+ file.getOriginalFilename());
-
-//				System.out.println(path);
-				Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-			}
 			session.setAttribute("succMsg", "Register successfully");
 		} else {
 			session.setAttribute("errorMsg", "something wrong on server");

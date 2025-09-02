@@ -1,14 +1,10 @@
 package com.ecom.service.impl;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,12 +15,16 @@ import org.springframework.web.multipart.MultipartFile;
 import com.ecom.model.Product;
 import com.ecom.repository.ProductRepository;
 import com.ecom.service.ProductService;
+import com.ecom.util.FileUploadUtil;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	private ProductRepository productRepository;
+
+	@Autowired
+	private FileUploadUtil fileUploadUtil;
 
 	@Override
 	public Product saveProduct(Product product) {
@@ -64,7 +64,7 @@ public class ProductServiceImpl implements ProductService {
 
 		Product dbProduct = getProductById(product.getId());
 
-		String imageName = image.isEmpty() ? dbProduct.getImage() : image.getOriginalFilename();
+		String imageName = dbProduct.getImage();
 
 		dbProduct.setTitle(product.getTitle());
 		dbProduct.setDescription(product.getDescription());
@@ -80,24 +80,19 @@ public class ProductServiceImpl implements ProductService {
 		Double discountPrice = product.getPrice() - disocunt;
 		dbProduct.setDiscountPrice(discountPrice);
 
+		if (!image.isEmpty()) {
+			// Use the new file upload utility
+			String savedFilename = fileUploadUtil.saveFile(image, "product_img");
+			if (savedFilename != null) {
+				imageName = savedFilename;
+				dbProduct.setImage(imageName);
+			}
+		}
+
 		Product updateProduct = productRepository.save(dbProduct);
 
 		if (!ObjectUtils.isEmpty(updateProduct)) {
-
-			if (!image.isEmpty()) {
-
-				try {
-					File saveFile = new ClassPathResource("static/img").getFile();
-
-					Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + "product_img" + File.separator
-							+ image.getOriginalFilename());
-					Files.copy(image.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			return product;
+			return updateProduct;
 		}
 		return null;
 	}

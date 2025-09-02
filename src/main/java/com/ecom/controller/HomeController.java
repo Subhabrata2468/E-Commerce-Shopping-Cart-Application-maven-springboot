@@ -1,20 +1,13 @@
 package com.ecom.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
-import java.util.stream.Collector;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -35,6 +28,7 @@ import com.ecom.service.CategoryService;
 import com.ecom.service.ProductService;
 import com.ecom.service.UserService;
 import com.ecom.util.CommonUtil;
+import com.ecom.util.FileUploadUtil;
 
 import io.micrometer.common.util.StringUtils;
 import jakarta.mail.MessagingException;
@@ -61,6 +55,9 @@ public class HomeController {
 
 	@Autowired
 	private CartService cartService;
+
+	@Autowired
+	private FileUploadUtil fileUploadUtil;
 
 	@ModelAttribute
 	public void getUserDetails(Principal p, Model m) {
@@ -147,20 +144,19 @@ public class HomeController {
 		if (existsEmail) {
 			session.setAttribute("errorMsg", "Email already exist");
 		} else {
-			String imageName = file.isEmpty() ? "default.jpg" : file.getOriginalFilename();
+			String imageName = "default.jpg";
+			if (!file.isEmpty()) {
+				// Use the new file upload utility
+				String savedFilename = fileUploadUtil.saveFile(file, "profile_img");
+				if (savedFilename != null) {
+					imageName = savedFilename;
+				}
+			}
+			
 			user.setProfileImage(imageName);
 			UserDtls saveUser = userService.saveUser(user);
 
 			if (!ObjectUtils.isEmpty(saveUser)) {
-				if (!file.isEmpty()) {
-					File saveFile = new ClassPathResource("static/img").getFile();
-
-					Path path = Paths.get(saveFile.getAbsolutePath() + File.separator + "profile_img" + File.separator
-							+ file.getOriginalFilename());
-
-//					System.out.println(path);
-					Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-				}
 				session.setAttribute("succMsg", "Register successfully");
 			} else {
 				session.setAttribute("errorMsg", "something wrong on server");
