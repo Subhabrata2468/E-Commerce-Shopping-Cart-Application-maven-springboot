@@ -109,7 +109,7 @@ public class AdminController {
 	public String saveCategory(@ModelAttribute Category category, @RequestParam("file") MultipartFile file,
 			HttpSession session) throws IOException {
 
-		Boolean existsName = categoryService.existsName(category.getName());
+		Boolean existsName = categoryService.existCategory(category.getName());
 
 		if (existsName) {
 			session.setAttribute("errorMsg", "Category Name already exists");
