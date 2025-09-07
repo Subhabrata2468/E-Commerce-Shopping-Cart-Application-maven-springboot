@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 
 import com.ecom.model.Cart;
 import com.ecom.model.OrderAddress;
@@ -96,7 +97,7 @@ public class OrderServiceImpl implements OrderService {
 
 	@Override
 	public Page<ProductOrder> getAllOrdersPagination(Integer pageNo, Integer pageSize) {
-		Pageable pageable = PageRequest.of(pageNo, pageSize);
+		Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "orderDate", "id"));
 		return orderRepository.findAll(pageable);
 
 	}
