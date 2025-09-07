@@ -307,14 +307,14 @@ public class AdminController {
 			
 			m.addAttribute("userType", type);
 			m.addAttribute("users", users != null ? users : new ArrayList<>());
-			return "/admin/users";
+			return "admin/users";
 		} catch (Exception e) {
 			System.err.println("Error in getAllUsers: " + e.getMessage());
 			e.printStackTrace();
 			m.addAttribute("userType", type);
 			m.addAttribute("users", new ArrayList<>());
 			m.addAttribute("errorMsg", "Error loading users: " + e.getMessage());
-			return "/admin/users";
+			return "admin/users";
 		}
 	}
 
@@ -448,14 +448,14 @@ public class AdminController {
 			m.addAttribute("isFirst", page.isFirst());
 			m.addAttribute("isLast", page.isLast());
 
-			return "/admin/orders";
+			return "admin/orders";
 		} catch (Exception e) {
 			System.err.println("Error in getAllOrders: " + e.getMessage());
 			e.printStackTrace();
 			m.addAttribute("orders", new ArrayList<>());
 			m.addAttribute("srch", false);
 			m.addAttribute("errorMsg", "Error loading orders: " + e.getMessage());
-			return "/admin/orders";
+			return "admin/orders";
 		}
 	}
 
@@ -520,19 +520,19 @@ public class AdminController {
 			m.addAttribute("isFirst", page.isFirst());
 			m.addAttribute("isLast", page.isLast());
 		}
-		return "/admin/orders";
+		return "admin/orders";
 	}
 
 	@GetMapping("/add-admin")
 	public String loadAdminAdd(Model m) {
 		try {
 			m.addAttribute("user", new UserDtls());
-			return "/admin/add_admin";
+			return "admin/add_admin";
 		} catch (Exception e) {
 			System.err.println("Error in loadAdminAdd: " + e.getMessage());
 			e.printStackTrace();
 			m.addAttribute("errorMsg", "Error loading add admin page: " + e.getMessage());
-			return "/admin/add_admin";
+			return "admin/add_admin";
 		}
 	}
 
@@ -563,7 +563,7 @@ public class AdminController {
 
 	@GetMapping("/profile")
 	public String profile() {
-		return "/admin/profile";
+		return "admin/profile";
 	}
 
 	@PostMapping("/update-profile")
