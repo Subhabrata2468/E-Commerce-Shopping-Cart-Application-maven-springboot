@@ -125,19 +125,19 @@
 									<th scope="row">[[${o.orderId}]]</th>
 									<td>
 										<div class="small">
-											<strong>Name:</strong> [[${o.orderAddress.firstName + ' ' + o.orderAddress.lastName}]]<br>
-											<strong>Email:</strong> [[${o.orderAddress.email}]]<br>
-											<strong>Mobile:</strong> [[${o.orderAddress.mobileNo}]]<br>
-											<strong>Address:</strong> [[${o.orderAddress.address}]]<br>
-											<strong>City:</strong> [[${o.orderAddress.city}]]<br>
-											<strong>State:</strong> [[${o.orderAddress.state}]] - [[${o.orderAddress.pincode}]]
+											<strong>Name:</strong> [[${o.orderAddress != null ? (o.orderAddress.firstName + ' ' + o.orderAddress.lastName) : 'N/A'}]]<br>
+											<strong>Email:</strong> [[${o.orderAddress != null ? o.orderAddress.email : 'N/A'}]]<br>
+											<strong>Mobile:</strong> [[${o.orderAddress != null ? o.orderAddress.mobileNo : 'N/A'}]]<br>
+											<strong>Address:</strong> [[${o.orderAddress != null ? o.orderAddress.address : 'N/A'}]]<br>
+											<strong>City:</strong> [[${o.orderAddress != null ? o.orderAddress.city : 'N/A'}]]<br>
+											<strong>State:</strong> [[${o.orderAddress != null ? o.orderAddress.state : 'N/A'}]] - [[${o.orderAddress != null ? o.orderAddress.pincode : 'N/A'}]]
 										</div>
 									</td>
 									<td>[[${#temporals.format(o.orderDate, 'dd/MM/yyyy')}]]</td>
 									<td>
 										<div class="small">
-											<strong>Product:</strong> [[${o.product.title}]]<br>
-											<strong>Category:</strong> [[${o.product.category.name}]]
+											<strong>Product:</strong> [[${o.product != null ? o.product.title : 'N/A'}]]<br>
+											<strong>Category:</strong> [[${o.product != null ? o.product.category : 'N/A'}]]
 										</div>
 									</td>
 									<td>
