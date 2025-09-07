@@ -1,6 +1,4 @@
 package com.ecom.service.impl;
-
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +43,11 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDtls getUserByEmail(String email) {
-		return userRepository.findByEmail(email);
+		UserDtls user = userRepository.findTop1ByEmailOrderByIdDesc(email);
+		if (user == null) {
+			user = userRepository.findByEmail(email);
+		}
+		return user;
 	}
 
 	@Override
