@@ -42,6 +42,13 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<!-- H2 Database (for quick testing) -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		
 		<!-- MySQL JDBC driver (runtime dependency) -->
 		<!-- ⚠️ During tests, if MySQL is not running, context loading may fail -->
 		<dependency>

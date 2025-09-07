@@ -4,18 +4,18 @@ services:
   mysql:
     image: mysql:8.0
     container_name: ecommerce-mysql
-    restart: unless-stopped # Changed from 'always' for more control
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER} # Added for better security
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD} # Added for better security
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./mysql-backups:/backups # Optional: for backup storage
-    healthcheck: # Added healthcheck
+      - ./mysql-backups:/backups
+    healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
@@ -26,33 +26,45 @@ services:
     restart: unless-stopped
     depends_on:
       mysql:
-        condition: service_healthy # Wait for MySQL to be healthy
+        condition: service_healthy
     ports:
       - "8080:8080"
     volumes:
-      # Mount external application.properties securely
       - ./application.properties:/app/config/application.properties
-      - app_logs:/app/logs # Optional: for persisting application logs
-      # Mount uploads directory for file storage
+      - app_logs:/app/logs
       - ./uploads:/app/uploads
     environment:
+      # Database
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: ${SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+
+      # Mail
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST}
       SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
       SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
-      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
-      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
-      SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: 50MB
-      SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: 50MB
-      # Add upload directory configuration
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE}
+
+      # File Upload
+      SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE}
+      SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE}
       UPLOAD_DIR: /app/uploads
+
+      # Admin
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_NAME: ${ADMIN_NAME}
+      ADMIN_MOBILE: ${ADMIN_MOBILE}
+      ADMIN_ADDRESS: ${ADMIN_ADDRESS}
+      ADMIN_CITY: ${ADMIN_CITY}
+      ADMIN_STATE: ${ADMIN_STATE}
+      ADMIN_PINCODE: ${ADMIN_PINCODE}
 
 volumes:
   mysql_data:
-    name: ecommerce-mysql-data # Explicit name for easier management
-  app_logs: # Optional: for persisting application logs
+    name: ecommerce-mysql-data
+  app_logs:
