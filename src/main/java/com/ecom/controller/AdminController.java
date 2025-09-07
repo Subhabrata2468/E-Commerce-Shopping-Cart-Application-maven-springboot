@@ -462,49 +462,28 @@ public class AdminController {
 	@PostMapping("/update-order-status")
 	public String updateOrderStatus(@RequestParam Integer id, @RequestParam Integer st, HttpSession session) {
 
-		try {
-			System.out.println("Updating order status - ID: " + id + ", Status ID: " + st);
-			
-			OrderStatus[] values = OrderStatus.values();
-			String status = null;
+		OrderStatus[] values = OrderStatus.values();
+		String status = null;
 
-			for (OrderStatus orderSt : values) {
-				if (orderSt.getId().equals(st)) {
-					status = orderSt.getName();
-					break;
-				}
+		for (OrderStatus orderSt : values) {
+			if (orderSt.getId().equals(st)) {
+				status = orderSt.getName();
 			}
-
-			if (status == null) {
-				System.err.println("Invalid status ID: " + st);
-				session.setAttribute("errorMsg", "Invalid status selected");
-				return "redirect:/admin/orders";
-			}
-
-			System.out.println("Updating order to status: " + status);
-			ProductOrder updateOrder = orderService.updateOrderStatus(id, status);
-
-			if (updateOrder != null) {
-				System.out.println("Order updated successfully: " + updateOrder.getOrderId());
-				
-				try {
-					commonUtil.sendMailForProductOrder(updateOrder, status);
-				} catch (Exception e) {
-					System.err.println("Failed to send email: " + e.getMessage());
-					e.printStackTrace();
-				}
-
-				session.setAttribute("succMsg", "Status Updated Successfully");
-			} else {
-				System.err.println("Failed to update order - order not found or update failed");
-				session.setAttribute("errorMsg", "Order not found or update failed");
-			}
-		} catch (Exception e) {
-			System.err.println("Error updating order status: " + e.getMessage());
-			e.printStackTrace();
-			session.setAttribute("errorMsg", "Error updating status: " + e.getMessage());
 		}
-		
+
+		ProductOrder updateOrder = orderService.updateOrderStatus(id, status);
+
+		try {
+			commonUtil.sendMailForProductOrder(updateOrder, status);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		if (!ObjectUtils.isEmpty(updateOrder)) {
+			session.setAttribute("succMsg", "Status Updated");
+		} else {
+			session.setAttribute("errorMsg", "status not updated");
+		}
 		return "redirect:/admin/orders";
 	}
 
