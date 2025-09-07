@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ecom.model.Category;
+import com.ecom.model.OrderAddress;
 import com.ecom.model.Product;
 import com.ecom.model.ProductOrder;
 import com.ecom.model.UserDtls;
@@ -289,10 +290,18 @@ public class AdminController {
 		List<UserDtls> users = null;
 		if (type == 1) {
 			users = userService.getUsers("ROLE_USER");
+			System.out.println("Found " + users.size() + " users with ROLE_USER");
 		} else {
 			users = userService.getUsers("ROLE_ADMIN");
+			System.out.println("Found " + users.size() + " users with ROLE_ADMIN");
 		}
-		m.addAttribute("userType",type);
+		
+		// Debug: Print user details
+		for (UserDtls user : users) {
+			System.out.println("User: " + user.getName() + " - " + user.getEmail() + " - " + user.getRole());
+		}
+		
+		m.addAttribute("userType", type);
 		m.addAttribute("users", users);
 		return "/admin/users";
 	}
@@ -308,14 +317,112 @@ public class AdminController {
 		return "redirect:/admin/users?type="+type;
 	}
 
+	@GetMapping("/create-test-users")
+	public String createTestUsers(HttpSession session) {
+		try {
+			// Check if users already exist
+			List<UserDtls> existingUsers = userService.getUsers("ROLE_USER");
+			if (existingUsers.isEmpty()) {
+				// Create sample users
+				UserDtls user1 = new UserDtls();
+				user1.setName("Test User 1");
+				user1.setEmail("test1@example.com");
+				user1.setPassword("password123");
+				user1.setMobileNumber("1111111111");
+				user1.setAddress("Test Address 1");
+				user1.setCity("Test City");
+				user1.setState("Test State");
+				user1.setPincode("12345");
+				userService.saveUser(user1);
+
+				UserDtls user2 = new UserDtls();
+				user2.setName("Test User 2");
+				user2.setEmail("test2@example.com");
+				user2.setPassword("password123");
+				user2.setMobileNumber("2222222222");
+				user2.setAddress("Test Address 2");
+				user2.setCity("Test City 2");
+				user2.setState("Test State 2");
+				user2.setPincode("54321");
+				userService.saveUser(user2);
+
+				session.setAttribute("succMsg", "Test users created successfully!");
+			} else {
+				session.setAttribute("succMsg", "Users already exist in database!");
+			}
+		} catch (Exception e) {
+			session.setAttribute("errorMsg", "Error creating test users: " + e.getMessage());
+		}
+		return "redirect:/admin/users?type=1";
+	}
+
+	@GetMapping("/create-test-orders")
+	public String createTestOrders(HttpSession session) {
+		try {
+			// Check if orders already exist
+			List<ProductOrder> existingOrders = orderService.getAllOrders();
+			if (existingOrders.isEmpty()) {
+				// Get some users and products for creating orders
+				List<UserDtls> users = userService.getUsers("ROLE_USER");
+				List<Product> products = productService.getAllProducts();
+				
+				if (!users.isEmpty() && !products.isEmpty()) {
+					// Create sample orders
+					for (int i = 0; i < 3; i++) {
+						ProductOrder order = new ProductOrder();
+						order.setOrderId("ORD-" + System.currentTimeMillis() + "-" + i);
+						order.setOrderDate(java.time.LocalDate.now());
+						order.setProduct(products.get(i % products.size()));
+						order.setPrice(products.get(i % products.size()).getDiscountPrice());
+						order.setQuantity(1 + i);
+						order.setUser(users.get(i % users.size()));
+						order.setStatus("In Progress");
+						order.setPaymentType("Cash on Delivery");
+						
+						// Create order address
+						OrderAddress address = new OrderAddress();
+						address.setFirstName("Test");
+						address.setLastName("User " + (i + 1));
+						address.setEmail("test" + (i + 1) + "@example.com");
+						address.setMobileNo("123456789" + i);
+						address.setAddress("Test Address " + (i + 1));
+						address.setCity("Test City " + (i + 1));
+						address.setState("Test State " + (i + 1));
+						address.setPincode("12345" + i);
+						
+						order.setOrderAddress(address);
+						
+						// Save order
+						ProductOrder savedOrder = orderService.saveOrder(order);
+						System.out.println("Created test order: " + savedOrder.getOrderId());
+					}
+					
+					session.setAttribute("succMsg", "Test orders created successfully!");
+				} else {
+					session.setAttribute("errorMsg", "No users or products found. Please create some first.");
+				}
+			} else {
+				session.setAttribute("succMsg", "Orders already exist in database!");
+			}
+		} catch (Exception e) {
+			session.setAttribute("errorMsg", "Error creating test orders: " + e.getMessage());
+		}
+		return "redirect:/admin/orders";
+	}
+
 	@GetMapping("/orders")
 	public String getAllOrders(Model m, @RequestParam(name = "pageNo", defaultValue = "0") Integer pageNo,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
-//		List<ProductOrder> allOrders = orderService.getAllOrders();
-//		m.addAttribute("orders", allOrders);
-//		m.addAttribute("srch", false);
-
+		
+		System.out.println("Loading all orders - page: " + pageNo + ", size: " + pageSize);
 		Page<ProductOrder> page = orderService.getAllOrdersPagination(pageNo, pageSize);
+		System.out.println("Found " + page.getTotalElements() + " orders");
+		
+		// Debug: Print order details
+		for (ProductOrder order : page.getContent()) {
+			System.out.println("Order: " + order.getOrderId() + " - " + order.getStatus() + " - " + order.getProduct().getTitle());
+		}
+		
 		m.addAttribute("orders", page.getContent());
 		m.addAttribute("srch", false);
 
@@ -358,12 +465,12 @@ public class AdminController {
 	}
 
 	@GetMapping("/search-order")
-	public String searchProduct(@RequestParam String orderId, Model m, HttpSession session,
+	public String searchOrder(@RequestParam(required = false) String orderId, Model m, HttpSession session,
 			@RequestParam(name = "pageNo", defaultValue = "0") Integer pageNo,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
 
 		if (orderId != null && orderId.length() > 0) {
-
+			System.out.println("Searching for order: " + orderId);
 			ProductOrder order = orderService.getOrdersByOrderId(orderId.trim());
 
 			if (ObjectUtils.isEmpty(order)) {
@@ -371,16 +478,16 @@ public class AdminController {
 				m.addAttribute("orderDtls", null);
 			} else {
 				m.addAttribute("orderDtls", order);
+				System.out.println("Order found: " + order.getOrderId());
 			}
 
 			m.addAttribute("srch", true);
 		} else {
-//			List<ProductOrder> allOrders = orderService.getAllOrders();
-//			m.addAttribute("orders", allOrders);
-//			m.addAttribute("srch", false);
-
+			System.out.println("Loading all orders with pagination - page: " + pageNo + ", size: " + pageSize);
 			Page<ProductOrder> page = orderService.getAllOrdersPagination(pageNo, pageSize);
-			m.addAttribute("orders", page);
+			System.out.println("Found " + page.getTotalElements() + " orders");
+			
+			m.addAttribute("orders", page.getContent());
 			m.addAttribute("srch", false);
 
 			m.addAttribute("pageNo", page.getNumber());
@@ -389,10 +496,8 @@ public class AdminController {
 			m.addAttribute("totalPages", page.getTotalPages());
 			m.addAttribute("isFirst", page.isFirst());
 			m.addAttribute("isLast", page.isLast());
-
 		}
 		return "/admin/orders";
-
 	}
 
 	@GetMapping("/add-admin")

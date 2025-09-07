@@ -1,67 +1,134 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-	th:replace="~{base::layout(~{::section})}">
-<head>
-<meta charset="ISO-8859-1">
-<title>Insert title here</title>
-</head>
-<body>
-	<section>
-		<div class="container-fluid mt-5 p-5">
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{base::layout(~{::section})}"
+>
+  <head>
+    <meta charset="ISO-8859-1" />
+    <title>Insert title here</title>
+  </head>
+  <body>
+    <section>
+      <div class="container-fluid mt-5 p-5">
+        <div class="card card-sh">
+          <div class="card-header text-center">
+            <div class="d-flex justify-content-between align-items-center">
+              <div></div>
+              <div>
+                <p class="fs-4 mb-0" th:if="${userType==1}">Users</p>
+                <p class="fs-4 mb-0" th:if="${userType==2}">Admin</p>
+              </div>
+              <div>
+                <a
+                  th:if="${userType==1}"
+                  href="/admin/create-test-users"
+                  class="btn btn-sm btn-outline-primary"
+                >
+                  <i class="fa-solid fa-plus"></i> Create Test Users
+                </a>
+              </div>
+            </div>
 
-			<div class="card card-sh">
-				<div class="card-header text-center">
-					<p class="fs-4" th:if="${userType==1}">Users</p>
-					<p class="fs-4" th:if="${userType==2}">Admin</p>
-					<th:block th:if="${session.succMsg}">
-						<p class="text-success fw-bold">[[${session.succMsg}]]</p>
-						<th:block th:text="${@commnServiceImpl.removeSessionMessage()}"></th:block>
-					</th:block>
+            <th:block th:if="${session.succMsg}">
+              <p class="text-success fw-bold">[[${session.succMsg}]]</p>
+              <th:block
+                th:text="${@commnServiceImpl.removeSessionMessage()}"
+              ></th:block>
+            </th:block>
 
-					<th:block th:if="${session.errorMsg}">
-						<p class="text-danger fw-bold">[[${session.errorMsg}]]</p>
-						<th:block th:text="${@commnServiceImpl.removeSessionMessage()}"></th:block>
-					</th:block>
-				</div>
-				<div class="card-body">
-					<table class="table">
-						<thead>
-							<tr>
-								<th scope="col">Sl No</th>
-								<th scope="col">Profile</th>
-								<th scope="col">Name</th>
-								<th scope="col">Email</th>
-								<th scope="col">Mobile No</th>
-								<th scope="col">Address</th>
-								<th scope="col">Status</th>
-								<th scope="col">Action</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr th:each="u,c:${users}">
-								<th scope="row">[[${c.count}]]</th>
-								<td><img th:src="@{'/img/profile_img/'+${u.profileImage}}"
-									width="70px" height="70px"></td>
-								<td>[[${u.name}]]</td>
-								<td>[[${u.email}]]</td>
-								<td>[[${u.mobileNumber}]]</td>
-								<td>[[${u.address+','+u.city+','+u.state+','+u.pincode}]]</td>
-								<td>[[${u.isEnable}]]</td>
-								<td><a th:href="@{'/admin/updateSts?status=true&id='+${u.id}}+'&type='+${userType}"
-									class="btn btn-sm btn-primary">Active</a> 
-										
-									<a
-									th:href="@{'/admin/updateSts?status=false&id='+${u.id}}+'&type='+${userType}"
-									class="btn btn-sm btn-danger">
-										Inactive</a></td>
-							</tr>
-
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-
-	</section>
-</body>
+            <th:block th:if="${session.errorMsg}">
+              <p class="text-danger fw-bold">[[${session.errorMsg}]]</p>
+              <th:block
+                th:text="${@commnServiceImpl.removeSessionMessage()}"
+              ></th:block>
+            </th:block>
+          </div>
+          <div class="card-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Sl No</th>
+                  <th scope="col">Profile</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Mobile No</th>
+                  <th scope="col">Address</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  th:each="u,c:${users}"
+                  th:if="${users != null and !users.empty}"
+                >
+                  <th scope="row">[[${c.count}]]</th>
+                  <td>
+                    <img
+                      th:if="${u.profileImage != null and !u.profileImage.isEmpty()}"
+                      th:src="@{'/img/profile_img/'+${u.profileImage}}"
+                      width="70px"
+                      height="70px"
+                      class="rounded-circle"
+                    />
+                    <img
+                      th:unless="${u.profileImage != null and !u.profileImage.isEmpty()}"
+                      src="/img/profile_img/ecom.png"
+                      width="70px"
+                      height="70px"
+                      class="rounded-circle"
+                    />
+                  </td>
+                  <td>[[${u.name}]]</td>
+                  <td>[[${u.email}]]</td>
+                  <td>[[${u.mobileNumber}]]</td>
+                  <td>
+                    <span th:if="${u.address != null and !u.address.isEmpty()}"
+                      >[[${u.address}]]</span
+                    >
+                    <span th:if="${u.city != null and !u.city.isEmpty()}"
+                      >, [[${u.city}]]</span
+                    >
+                    <span th:if="${u.state != null and !u.state.isEmpty()}"
+                      >, [[${u.state}]]</span
+                    >
+                    <span th:if="${u.pincode != null and !u.pincode.isEmpty()}"
+                      >, [[${u.pincode}]]</span
+                    >
+                  </td>
+                  <td>
+                    <span th:if="${u.isEnable}" class="badge bg-success"
+                      >Active</span
+                    >
+                    <span th:unless="${u.isEnable}" class="badge bg-danger"
+                      >Inactive</span
+                    >
+                  </td>
+                  <td>
+                    <a
+                      th:href="@{'/admin/updateSts?status=true&id='+${u.id}+'&type='+${userType}}"
+                      class="btn btn-sm btn-primary me-1"
+                      >Active</a
+                    >
+                    <a
+                      th:href="@{'/admin/updateSts?status=false&id='+${u.id}+'&type='+${userType}}"
+                      class="btn btn-sm btn-danger"
+                      >Inactive</a
+                    >
+                  </td>
+                </tr>
+                <tr th:if="${users == null or users.empty}">
+                  <td colspan="8" class="text-center text-muted">
+                    <i class="fa-solid fa-users fa-2x mb-2"></i><br />
+                    No users found
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
 </html>
