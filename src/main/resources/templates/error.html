@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{base::layout(~{::section})}"
+>
+  <head>
+    <meta charset="ISO-8859-1" />
+    <title>Error - E-Commerce</title>
+  </head>
+  <body>
+    <section>
+      <div class="container-fluid mt-5 p-5">
+        <div class="row justify-content-center">
+          <div class="col-md-8">
+            <div class="card card-sh">
+              <div class="card-header text-center bg-danger text-white">
+                <h3>
+                  <i class="fa-solid fa-exclamation-triangle"></i> Error
+                  Occurred
+                </h3>
+              </div>
+              <div class="card-body text-center">
+                <div class="mb-4">
+                  <i class="fa-solid fa-bug fa-5x text-danger"></i>
+                </div>
+                <h4 class="text-danger mb-3">Something went wrong!</h4>
+                <p class="text-muted mb-4" th:if="${errorMsg}">
+                  <span th:text="${errorMsg}"></span>
+                </p>
+                <p class="text-muted mb-4" th:unless="${errorMsg}">
+                  An unexpected error occurred. Please try again later.
+                </p>
+                <div class="mt-4">
+                  <a href="/" class="btn btn-primary me-2">
+                    <i class="fa-solid fa-home"></i> Go Home
+                  </a>
+                  <a href="javascript:history.back()" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Go Back
+                  </a>
+                </div>
+                <div class="mt-4" th:if="${exception}">
+                  <details class="text-start">
+                    <summary class="btn btn-outline-info btn-sm">
+                      Show Technical Details
+                    </summary>
+                    <div class="mt-2 p-3 bg-light rounded">
+                      <small>
+                        <strong>Exception:</strong>
+                        <span th:text="${exception.class.simpleName}"></span
+                        ><br />
+                        <strong>Message:</strong>
+                        <span th:text="${exception.message}"></span><br />
+                        <strong>URL:</strong> <span th:text="${url}"></span>
+                      </small>
+                    </div>
+                  </details>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

@@ -18,6 +18,9 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre AS runtime
 WORKDIR /app
 
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # Copy the fat JAR from build stage
 COPY --from=build /app/target/*.jar app.jar
 
@@ -25,8 +28,15 @@ COPY --from=build /app/target/*.jar app.jar
 RUN mkdir -p /app/uploads/profile_img /app/uploads/product_img /app/uploads/category_img && \
     chmod -R 755 /app/uploads
 
+# Create config directory
+RUN mkdir -p /app/config
+
 # Expose port
 EXPOSE 8080
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 # Run the app with externalized config
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.location=file:/app/config/application.properties"]

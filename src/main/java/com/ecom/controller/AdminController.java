@@ -2,6 +2,7 @@ package com.ecom.controller;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -286,24 +287,35 @@ public class AdminController {
 	}
 
 	@GetMapping("/users")
-	public String getAllUsers(Model m, @RequestParam Integer type) {
-		List<UserDtls> users = null;
-		if (type == 1) {
-			users = userService.getUsers("ROLE_USER");
-			System.out.println("Found " + users.size() + " users with ROLE_USER");
-		} else {
-			users = userService.getUsers("ROLE_ADMIN");
-			System.out.println("Found " + users.size() + " users with ROLE_ADMIN");
+	public String getAllUsers(Model m, @RequestParam(required = false, defaultValue = "1") Integer type) {
+		try {
+			List<UserDtls> users = null;
+			if (type == 1) {
+				users = userService.getUsers("ROLE_USER");
+				System.out.println("Found " + users.size() + " users with ROLE_USER");
+			} else {
+				users = userService.getUsers("ROLE_ADMIN");
+				System.out.println("Found " + users.size() + " users with ROLE_ADMIN");
+			}
+			
+			// Debug: Print user details
+			if (users != null) {
+				for (UserDtls user : users) {
+					System.out.println("User: " + user.getName() + " - " + user.getEmail() + " - " + user.getRole());
+				}
+			}
+			
+			m.addAttribute("userType", type);
+			m.addAttribute("users", users != null ? users : new ArrayList<>());
+			return "/admin/users";
+		} catch (Exception e) {
+			System.err.println("Error in getAllUsers: " + e.getMessage());
+			e.printStackTrace();
+			m.addAttribute("userType", type);
+			m.addAttribute("users", new ArrayList<>());
+			m.addAttribute("errorMsg", "Error loading users: " + e.getMessage());
+			return "/admin/users";
 		}
-		
-		// Debug: Print user details
-		for (UserDtls user : users) {
-			System.out.println("User: " + user.getName() + " - " + user.getEmail() + " - " + user.getRole());
-		}
-		
-		m.addAttribute("userType", type);
-		m.addAttribute("users", users);
-		return "/admin/users";
 	}
 
 	@GetMapping("/updateSts")
@@ -414,26 +426,37 @@ public class AdminController {
 	public String getAllOrders(Model m, @RequestParam(name = "pageNo", defaultValue = "0") Integer pageNo,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
 		
-		System.out.println("Loading all orders - page: " + pageNo + ", size: " + pageSize);
-		Page<ProductOrder> page = orderService.getAllOrdersPagination(pageNo, pageSize);
-		System.out.println("Found " + page.getTotalElements() + " orders");
-		
-		// Debug: Print order details
-		for (ProductOrder order : page.getContent()) {
-			System.out.println("Order: " + order.getOrderId() + " - " + order.getStatus() + " - " + order.getProduct().getTitle());
+		try {
+			System.out.println("Loading all orders - page: " + pageNo + ", size: " + pageSize);
+			Page<ProductOrder> page = orderService.getAllOrdersPagination(pageNo, pageSize);
+			System.out.println("Found " + page.getTotalElements() + " orders");
+			
+			// Debug: Print order details
+			if (page.getContent() != null) {
+				for (ProductOrder order : page.getContent()) {
+					System.out.println("Order: " + order.getOrderId() + " - " + order.getStatus() + " - " + (order.getProduct() != null ? order.getProduct().getTitle() : "No Product"));
+				}
+			}
+			
+			m.addAttribute("orders", page.getContent() != null ? page.getContent() : new ArrayList<>());
+			m.addAttribute("srch", false);
+
+			m.addAttribute("pageNo", page.getNumber());
+			m.addAttribute("pageSize", pageSize);
+			m.addAttribute("totalElements", page.getTotalElements());
+			m.addAttribute("totalPages", page.getTotalPages());
+			m.addAttribute("isFirst", page.isFirst());
+			m.addAttribute("isLast", page.isLast());
+
+			return "/admin/orders";
+		} catch (Exception e) {
+			System.err.println("Error in getAllOrders: " + e.getMessage());
+			e.printStackTrace();
+			m.addAttribute("orders", new ArrayList<>());
+			m.addAttribute("srch", false);
+			m.addAttribute("errorMsg", "Error loading orders: " + e.getMessage());
+			return "/admin/orders";
 		}
-		
-		m.addAttribute("orders", page.getContent());
-		m.addAttribute("srch", false);
-
-		m.addAttribute("pageNo", page.getNumber());
-		m.addAttribute("pageSize", pageSize);
-		m.addAttribute("totalElements", page.getTotalElements());
-		m.addAttribute("totalPages", page.getTotalPages());
-		m.addAttribute("isFirst", page.isFirst());
-		m.addAttribute("isLast", page.isLast());
-
-		return "/admin/orders";
 	}
 
 	@PostMapping("/update-order-status")
@@ -501,8 +524,16 @@ public class AdminController {
 	}
 
 	@GetMapping("/add-admin")
-	public String loadAdminAdd() {
-		return "/admin/add_admin";
+	public String loadAdminAdd(Model m) {
+		try {
+			m.addAttribute("user", new UserDtls());
+			return "/admin/add_admin";
+		} catch (Exception e) {
+			System.err.println("Error in loadAdminAdd: " + e.getMessage());
+			e.printStackTrace();
+			m.addAttribute("errorMsg", "Error loading add admin page: " + e.getMessage());
+			return "/admin/add_admin";
+		}
 	}
 
 	@PostMapping("/save-admin")

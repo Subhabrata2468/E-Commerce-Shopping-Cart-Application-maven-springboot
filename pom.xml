@@ -95,6 +95,12 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 			<!--<version>3.3.1</version>--> <!-- Version is managed by Spring Boot, no need to specify -->
 		</dependency>
+
+		<!-- Spring Boot Actuator (for health checks and monitoring) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
