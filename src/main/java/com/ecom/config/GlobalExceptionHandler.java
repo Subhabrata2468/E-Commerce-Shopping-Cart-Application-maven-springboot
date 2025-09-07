@@ -2,6 +2,7 @@ package com.ecom.config;
 
 import java.io.IOException;
 import org.apache.catalina.connector.ClientAbortException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
@@ -65,5 +66,11 @@ public class GlobalExceptionHandler {
             depth++;
         }
         return false;
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public void handleNoResourceFound(HttpServletRequest request, NoResourceFoundException ex) {
+        System.err.println("Static resource not found: " + request.getRequestURI());
+        // No view rendering; let default 404 handling proceed without stack trace noise
     }
 }

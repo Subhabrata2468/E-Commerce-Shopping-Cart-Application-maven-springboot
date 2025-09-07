@@ -66,15 +66,8 @@
                   <th scope="row">[[${c.count}]]</th>
                   <td>
                     <img
-                      th:if="${u.profileImage != null and !u.profileImage.isEmpty()}"
-                      th:src="@{'/img/profile_img/'+${u.profileImage}}"
-                      width="70px"
-                      height="70px"
-                      class="rounded-circle"
-                    />
-                    <img
-                      th:unless="${u.profileImage != null and !u.profileImage.isEmpty()}"
-                      src="/img/profile_img/ecom.png"
+                      th:with="imgUrl=${@imagePathUtil.getProfileImagePath(u.profileImage)}"
+                      th:src="@{${imgUrl}}"
                       width="70px"
                       height="70px"
                       class="rounded-circle"
