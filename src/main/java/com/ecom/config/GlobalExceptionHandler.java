@@ -1,5 +1,7 @@
 package com.ecom.config;
 
+import java.io.IOException;
+import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
@@ -35,5 +37,33 @@ public class GlobalExceptionHandler {
         modelAndView.setViewName("error");
         
         return modelAndView;
+    }
+
+    @ExceptionHandler(ClientAbortException.class)
+    public void handleClientAbort(HttpServletRequest request, ClientAbortException ex) {
+        System.err.println("Client aborted connection while handling: " + request.getRequestURI());
+    }
+
+    @ExceptionHandler(IOException.class)
+    public void handleIOException(HttpServletRequest request, IOException ex) throws IOException {
+        if (isBrokenPipe(ex)) {
+            System.err.println("Broken pipe detected for: " + request.getRequestURI());
+            return;
+        }
+        throw ex;
+    }
+
+    private boolean isBrokenPipe(Throwable ex) {
+        Throwable current = ex;
+        int depth = 0;
+        while (current != null && depth < 10) {
+            String message = current.getMessage();
+            if (message != null && message.toLowerCase().contains("broken pipe")) {
+                return true;
+            }
+            current = current.getCause();
+            depth++;
+        }
+        return false;
     }
 }
