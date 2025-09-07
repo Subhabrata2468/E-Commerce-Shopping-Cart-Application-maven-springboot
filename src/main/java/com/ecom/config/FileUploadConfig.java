@@ -17,6 +17,13 @@ public class FileUploadConfig implements WebMvcConfigurer {
         // Serve uploaded files as static resources
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:" + uploadDir + "/");
+        // Backward-compat: serve direct /profile_img/**, /product_img/**, /category_img/**
+        registry.addResourceHandler("/profile_img/**")
+                .addResourceLocations("file:" + uploadDir + "/profile_img/");
+        registry.addResourceHandler("/product_img/**")
+                .addResourceLocations("file:" + uploadDir + "/product_img/");
+        registry.addResourceHandler("/category_img/**")
+                .addResourceLocations("file:" + uploadDir + "/category_img/");
         
         // Explicit handlers for classpath static assets
         registry.addResourceHandler("/img/**")
