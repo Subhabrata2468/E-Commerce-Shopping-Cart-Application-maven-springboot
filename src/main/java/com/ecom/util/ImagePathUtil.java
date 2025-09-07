@@ -21,18 +21,12 @@ public class ImagePathUtil {
      */
     public String getImagePath(String imageName, String imageType) {
         if (imageName == null || imageName.isEmpty() || "default.jpg".equals(imageName)) {
-            // For default images, use static path
             return "/img/" + imageType + "/" + imageName;
         }
-        
-        // Check if the uploaded file exists
-        if (fileUploadUtil.fileExists(imageName, imageType)) {
-            // For uploaded files, use uploads path
-            return "/uploads/" + imageType + "/" + imageName;
-        } else {
-            // Fallback to static path if upload doesn't exist
-            return "/img/" + imageType + "/" + imageName;
-        }
+
+        // Prefer uploads for any non-default image name; this avoids incorrect fallbacks
+        // to classpath static when the file is actually stored under /uploads/** in Docker.
+        return "/uploads/" + imageType + "/" + imageName;
     }
 
     /**
