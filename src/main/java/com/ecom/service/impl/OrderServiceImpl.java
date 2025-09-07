@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.ecom.model.Cart;
@@ -79,12 +80,25 @@ public class OrderServiceImpl implements OrderService {
 
 	@Override
 	public ProductOrder updateOrderStatus(Integer id, String status) {
-		Optional<ProductOrder> findById = orderRepository.findById(id);
-		if (findById.isPresent()) {
-			ProductOrder productOrder = findById.get();
-			productOrder.setStatus(status);
-			ProductOrder updateOrder = orderRepository.save(productOrder);
-			return updateOrder;
+		try {
+			System.out.println("OrderServiceImpl: Updating order ID " + id + " to status: " + status);
+			
+			Optional<ProductOrder> findById = orderRepository.findById(id);
+			if (findById.isPresent()) {
+				ProductOrder productOrder = findById.get();
+				System.out.println("OrderServiceImpl: Found order " + productOrder.getOrderId() + " with current status: " + productOrder.getStatus());
+				
+				productOrder.setStatus(status);
+				ProductOrder updateOrder = orderRepository.save(productOrder);
+				
+				System.out.println("OrderServiceImpl: Order updated successfully with new status: " + updateOrder.getStatus());
+				return updateOrder;
+			} else {
+				System.err.println("OrderServiceImpl: Order with ID " + id + " not found");
+			}
+		} catch (Exception e) {
+			System.err.println("OrderServiceImpl: Error updating order status: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return null;
 	}
@@ -96,9 +110,29 @@ public class OrderServiceImpl implements OrderService {
 
 	@Override
 	public Page<ProductOrder> getAllOrdersPagination(Integer pageNo, Integer pageSize) {
-		Pageable pageable = PageRequest.of(pageNo, pageSize);
-		return orderRepository.findAll(pageable);
-
+		try {
+			System.out.println("OrderServiceImpl: Getting orders - page: " + pageNo + ", size: " + pageSize);
+			
+			// Sort by newest orders first (by orderDate desc, then by id desc)
+			Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "orderDate", "id"));
+			Page<ProductOrder> result = orderRepository.findAll(pageable);
+			
+			System.out.println("OrderServiceImpl: Found " + result.getTotalElements() + " total orders, " + result.getContent().size() + " on this page");
+			
+			// Debug: Print first few orders
+			if (!result.getContent().isEmpty()) {
+				for (int i = 0; i < Math.min(3, result.getContent().size()); i++) {
+					ProductOrder order = result.getContent().get(i);
+					System.out.println("OrderServiceImpl: Order " + (i+1) + " - ID: " + order.getId() + ", OrderID: " + order.getOrderId() + ", Status: " + order.getStatus() + ", Date: " + order.getOrderDate());
+				}
+			}
+			
+			return result;
+		} catch (Exception e) {
+			System.err.println("OrderServiceImpl: Error getting orders: " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
