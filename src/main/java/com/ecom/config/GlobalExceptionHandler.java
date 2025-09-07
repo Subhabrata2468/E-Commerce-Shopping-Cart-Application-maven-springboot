@@ -5,15 +5,20 @@ import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ModelAndView handleException(HttpServletRequest request, Exception ex) {
+        if (ex instanceof NoResourceFoundException) {
+            return null; // Let default 404 handling proceed silently
+        }
         System.err.println("Global Exception Handler caught: " + ex.getMessage());
         ex.printStackTrace();
         
@@ -69,8 +74,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public void handleNoResourceFound(HttpServletRequest request, NoResourceFoundException ex) {
-        System.err.println("Static resource not found: " + request.getRequestURI());
-        // No view rendering; let default 404 handling proceed without stack trace noise
+        // Quietly return 404 without stack trace noise
     }
 }
