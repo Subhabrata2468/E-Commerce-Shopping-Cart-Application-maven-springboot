@@ -20,7 +20,6 @@ import com.ecom.model.Category;
 import com.ecom.model.OrderRequest;
 import com.ecom.model.ProductOrder;
 import com.ecom.model.UserDtls;
-import com.ecom.repository.UserRepository;
 import com.ecom.service.CartService;
 import com.ecom.service.CategoryService;
 import com.ecom.service.OrderService;
@@ -53,6 +52,13 @@ public class UserController {
 
 	@GetMapping("/")
 	public String home() {
+		System.out.println("[UserController] GET /user/ -> user/home");
+		return "user/home";
+	}
+
+	@GetMapping("/home")
+	public String homeAlias() {
+		System.out.println("[UserController] GET /user/home -> user/home");
 		return "user/home";
 	}
 
@@ -84,6 +90,8 @@ public class UserController {
 
 	@GetMapping("/cart")
 	public String loadCartPage(Principal p, Model m) {
+
+		System.out.println("[UserController] GET /user/cart");
 
 		UserDtls user = getLoggedInUserDetails(p);
 		List<Cart> carts = cartService.getCartsByUser(user.getId());
@@ -173,6 +181,7 @@ public class UserController {
 
 	@GetMapping("/profile")
 	public String profile() {
+		System.out.println("[UserController] GET /user/profile");
 		return "/user/profile";
 	}
 
