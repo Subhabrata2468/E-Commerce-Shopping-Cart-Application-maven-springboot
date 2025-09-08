@@ -61,4 +61,4 @@ dependency-reduced-pom.xml
 *.bak
 
 # Local environment configs (don’t push your secrets!)
-#.env
+.env
