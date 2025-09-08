@@ -63,54 +63,7 @@ public class AdminInitializer implements CommandLineRunner {
             System.out.println("Admin user already exists!");
         }
         
-        // Create some sample users for testing
-        createSampleUsers();
     }
     
-    private void createSampleUsers() {
-        // Check if sample users already exist
-        if (userService.getUsers("ROLE_USER").isEmpty()) {
-            System.out.println("Creating sample users...");
-            
-            // Sample User 1
-            UserDtls user1 = new UserDtls();
-            user1.setName("John Doe");
-            user1.setEmail("john.doe@example.com");
-            user1.setPassword("password123");
-            user1.setMobileNumber("1234567890");
-            user1.setAddress("123 Main St");
-            user1.setCity("New York");
-            user1.setState("NY");
-            user1.setPincode("10001");
-            userService.saveUser(user1);
-            
-            // Sample User 2
-            UserDtls user2 = new UserDtls();
-            user2.setName("Jane Smith");
-            user2.setEmail("jane.smith@example.com");
-            user2.setPassword("password123");
-            user2.setMobileNumber("0987654321");
-            user2.setAddress("456 Oak Ave");
-            user2.setCity("Los Angeles");
-            user2.setState("CA");
-            user2.setPincode("90210");
-            userService.saveUser(user2);
-            
-            // Sample User 3
-            UserDtls user3 = new UserDtls();
-            user3.setName("Bob Johnson");
-            user3.setEmail("bob.johnson@example.com");
-            user3.setPassword("password123");
-            user3.setMobileNumber("5555555555");
-            user3.setAddress("789 Pine St");
-            user3.setCity("Chicago");
-            user3.setState("IL");
-            user3.setPincode("60601");
-            userService.saveUser(user3);
-            
-            System.out.println("Sample users created successfully!");
-        } else {
-            System.out.println("Sample users already exist!");
-        }
-    }
+    
 }

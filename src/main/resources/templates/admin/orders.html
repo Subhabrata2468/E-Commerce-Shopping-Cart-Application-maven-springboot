@@ -50,6 +50,7 @@
 						<thead class="table-light">
 							<tr>
 								<th scope="col">Order Id</th>
+								<th scope="col">User</th>
 								<th scope="col">Deliver Details</th>
 								<th scope="col">Date</th>
 								<th scope="col">Product Details</th>
@@ -63,6 +64,13 @@
 								<th:block th:if="${orderDtls!=null}">
 									<tr>
 										<th scope="row">[[${orderDtls.orderId}]]</th>
+
+										<td>
+											<div class="small">
+												<strong>Name:</strong> [[${orderDtls.user != null ? orderDtls.user.name : 'N/A'}]]<br>
+												<strong>Email:</strong> [[${orderDtls.user != null ? orderDtls.user.email : 'N/A'}]]
+											</div>
+										</td>
 
 										<td>Name : [[${orderDtls.orderAddress.firstName+'
 											'+orderDtls.orderAddress.lastName}]]<br> Email :
@@ -125,6 +133,12 @@
 									<th scope="row">[[${o.orderId}]]</th>
 									<td>
 										<div class="small">
+											<strong>Name:</strong> [[${o.user != null ? o.user.name : 'N/A'}]]<br>
+											<strong>Email:</strong> [[${o.user != null ? o.user.email : 'N/A'}]]
+										</div>
+									</td>
+									<td>
+										<div class="small">
 											<strong>Name:</strong> [[${o.orderAddress.firstName + ' ' + o.orderAddress.lastName}]]<br>
 											<strong>Email:</strong> [[${o.orderAddress.email}]]<br>
 											<strong>Mobile:</strong> [[${o.orderAddress.mobileNo}]]<br>
@@ -183,7 +197,7 @@
 									</td>
 								</tr>
 								<tr th:if="${orders == null or orders.empty}">
-									<td colspan="7" class="text-center text-muted">
+									<td colspan="8" class="text-center text-muted">
 										<i class="fa-solid fa-box-open fa-2x mb-2"></i><br>
 										No orders found
 									</td>
