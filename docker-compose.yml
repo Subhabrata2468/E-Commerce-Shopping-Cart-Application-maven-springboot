@@ -21,8 +21,12 @@ services:
       retries: 10
 
   app:
-    build: .
-    container_name: shopping-cart-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # 👇 Replace with your Docker Hub username + repo name
+    image: subhabrata3002/shopping-cart-app-maven-springboot:latest
+    container_name: shopping-cart-app-maven-springboot
     restart: unless-stopped
     depends_on:
       mysql:
