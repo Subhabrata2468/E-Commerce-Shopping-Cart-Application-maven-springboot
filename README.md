@@ -437,6 +437,16 @@ docker-compose down
 docker-compose down -v
 ```
 
+### CI/CD: Jenkins Image Tag
+
+When running in a Jenkins pipeline, pass the Jenkins Build ID to Docker Compose as the image tag:
+
+```bash
+# Before docker-compose up
+export IMAGE_TAG=${BUILD_ID}
+docker-compose up -d
+```
+
 ### Docker Services
 
 - **MySQL 8.0**: Database service with persistent storage
