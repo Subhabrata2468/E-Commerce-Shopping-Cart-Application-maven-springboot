@@ -83,7 +83,7 @@ A comprehensive full-stack e-commerce application built with Spring Boot 3.2.4, 
 
 ## 📁 Project Structure
 
-```
+```mathematica
 E-Commerce-Shopping-Cart-Application-maven-springboot/
 ├── src/
 │   ├── main/

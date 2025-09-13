@@ -1,0 +1,89 @@
+---
+- name: Install Jenkins on Ubuntu 24.04 (Noble)
+  hosts: jenkins_server
+  become: true
+
+  vars:
+    java_package: openjdk-21-jdk-headless
+
+  tasks:
+  # Ensure that the apt cache directory exists.
+  # Fixes issues where /var/lib/apt/lists/partial may be missing
+  # and prevents apt lock errors during package installation.
+  - name: Ensure apt lists directory exists (self-heal if missing)
+    file:
+      path: /var/lib/apt/lists/partial
+      state: directory
+      owner: root
+      group: root
+      mode: '0755'
+
+  # Install essential prerequisites required for secure package management
+  # - gnupg: manages GPG keys
+  # - ca-certificates: ensures HTTPS connections are trusted
+  # - curl: fetches remote files (like repository keys)
+  - name: Ensure prerequisites are installed
+    apt:
+      name:
+      - gnupg
+      - ca-certificates
+      - curl
+      state: present
+      update_cache: yes
+
+  # Download the official Jenkins GPG key and save it to /etc/apt/keyrings
+  # This ensures that all Jenkins packages are verified before installation.
+  - name: Download Jenkins GPG key to /etc/apt/keyrings
+    get_url:
+      url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+      dest: /etc/apt/keyrings/jenkins-keyring.asc
+      mode: '0644'
+
+  # Configure the Jenkins APT repository in sources.list.d
+  # Uses the signed-by option to reference the downloaded GPG key.
+  - name: Add Jenkins apt repository
+    copy:
+      dest: /etc/apt/sources.list.d/jenkins.list
+      content: |
+        deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/
+      owner: root
+      group: root
+      mode: '0644'
+
+  # Refresh the apt package index after adding the Jenkins repo
+  - name: Update apt cache
+    apt:
+      update_cache: yes
+
+  # Install the required Java runtime (OpenJDK 21) for Jenkins.
+  # Jenkins requires Java to run, and OpenJDK 21 is the recommended LTS version.
+  - name: Install Java (required for Jenkins)
+    apt:
+      name: "{{ java_package }}"
+      state: present
+
+  # Install Jenkins itself from the configured repository.
+  - name: Install Jenkins
+    apt:
+      name: jenkins
+      state: present
+
+  # Ensure the Jenkins service is enabled to start on boot
+  # and started immediately after installation.
+  - name: Ensure Jenkins service is enabled and started
+    systemd:
+      name: jenkins
+      enabled: yes
+      state: started
+
+  # Retrieve the initial Jenkins admin password generated after installation.
+  # This password is required for the first login on the Jenkins web UI.
+  - name: Show initial Jenkins admin password
+    command: cat /var/lib/jenkins/secrets/initialAdminPassword
+    register: jenkins_password
+    changed_when: false
+
+  # Display the retrieved Jenkins admin password in the Ansible output.
+  - name: Print Jenkins initial admin password
+    debug:
+      msg: "Jenkins initial admin password: {{ jenkins_password.stdout }}"
