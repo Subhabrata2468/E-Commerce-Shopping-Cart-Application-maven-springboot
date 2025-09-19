@@ -5,6 +5,7 @@ services:
     image: mysql:8.0
     container_name: ecommerce-mysql
     restart: unless-stopped
+    env_file: .env # 👈 ADD THIS LINE
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -24,7 +25,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # 👇 Replace with your Docker Hub username + repo name
     image: subhabrata3002/shopping-cart-app-maven-springboot:${IMAGE_TAG}
     container_name: shopping-cart-app-maven-springboot
     restart: unless-stopped
@@ -37,8 +37,8 @@ services:
       - ./application.properties:/app/config/application.properties
       - app_logs:/app/logs
       - ./uploads:/app/uploads
+    env_file: .env # 👈 ADD THIS LINE TOO
     environment:
-      # Database
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
@@ -46,19 +46,16 @@ services:
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: ${SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT}
       SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
 
-      # Mail
       SPRING_MAIL_HOST: ${SPRING_MAIL_HOST}
       SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
       SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH}
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE}
 
-      # File Upload
       SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE}
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE}
       UPLOAD_DIR: /app/uploads
 
-      # Admin
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       ADMIN_NAME: ${ADMIN_NAME}
